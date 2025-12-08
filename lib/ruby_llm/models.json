@@ -174,7 +174,8 @@
       ]
     },
     "capabilities": [
-      "function_calling"
+      "function_calling",
+      "structured_output"
     ],
     "pricing": {
       "text_tokens": {
