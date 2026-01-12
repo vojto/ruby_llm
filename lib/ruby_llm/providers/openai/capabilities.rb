@@ -26,7 +26,10 @@ module RubyLLM
           gpt4o_realtime: /^gpt-4o-realtime/,
           gpt4o_search: /^gpt-4o-search/,
           gpt4o_transcribe: /^gpt-4o-transcribe/,
-          gpt5: /^gpt-5/,
+          gpt5: /^gpt-5(?!\.)/,
+          gpt51: /^gpt-5\.1/,
+          gpt52: /^gpt-5\.2(?!-pro)/,
+          gpt52_pro: /^gpt-5\.2-pro/,
           gpt5_mini: /^gpt-5-mini/,
           gpt5_nano: /^gpt-5-nano/,
           o1: /^o1(?!-(?:mini|pro))/,
@@ -47,7 +50,8 @@ module RubyLLM
         def context_window_for(model_id)
           case model_family(model_id)
           when 'gpt41', 'gpt41_mini', 'gpt41_nano' then 1_047_576
-          when 'gpt5', 'gpt5_mini', 'gpt5_nano', 'chatgpt4o', 'gpt4_turbo', 'gpt4o', 'gpt4o_audio', 'gpt4o_mini',
+          when 'gpt52', 'gpt52_pro' then 400_000
+          when 'gpt5', 'gpt51', 'gpt5_mini', 'gpt5_nano', 'chatgpt4o', 'gpt4_turbo', 'gpt4o', 'gpt4o_audio', 'gpt4o_mini',
                'gpt4o_mini_audio', 'gpt4o_mini_realtime', 'gpt4o_realtime',
                'gpt4o_search', 'gpt4o_transcribe', 'gpt4o_mini_search', 'o1_mini' then 128_000
           when 'gpt4' then 8_192
@@ -62,7 +66,7 @@ module RubyLLM
 
         def max_tokens_for(model_id)
           case model_family(model_id)
-          when 'gpt5', 'gpt5_mini', 'gpt5_nano' then 400_000
+          when 'gpt5', 'gpt51', 'gpt52', 'gpt52_pro', 'gpt5_mini', 'gpt5_nano' then 128_000
           when 'gpt41', 'gpt41_mini', 'gpt41_nano' then 32_768
           when 'chatgpt4o', 'gpt4o', 'gpt4o_mini', 'gpt4o_mini_search' then 16_384
           when 'babbage', 'davinci' then 16_384 # rubocop:disable Lint/DuplicateBranch
@@ -80,8 +84,8 @@ module RubyLLM
 
         def supports_vision?(model_id)
           case model_family(model_id)
-          when 'gpt5', 'gpt5_mini', 'gpt5_nano', 'gpt41', 'gpt41_mini', 'gpt41_nano', 'chatgpt4o', 'gpt4',
-               'gpt4_turbo', 'gpt4o', 'gpt4o_mini', 'o1', 'o1_pro', 'moderation', 'gpt4o_search',
+          when 'gpt5', 'gpt51', 'gpt52', 'gpt52_pro', 'gpt5_mini', 'gpt5_nano', 'gpt41', 'gpt41_mini', 'gpt41_nano',
+               'chatgpt4o', 'gpt4', 'gpt4_turbo', 'gpt4o', 'gpt4o_mini', 'o1', 'o1_pro', 'moderation', 'gpt4o_search',
                'gpt4o_mini_search' then true
           else false
           end
@@ -89,8 +93,8 @@ module RubyLLM
 
         def supports_functions?(model_id)
           case model_family(model_id)
-          when 'gpt5', 'gpt5_mini', 'gpt5_nano', 'gpt41', 'gpt41_mini', 'gpt41_nano', 'gpt4', 'gpt4_turbo', 'gpt4o',
-               'gpt4o_mini', 'o1', 'o1_pro', 'o3_mini' then true
+          when 'gpt5', 'gpt51', 'gpt52', 'gpt52_pro', 'gpt5_mini', 'gpt5_nano', 'gpt41', 'gpt41_mini', 'gpt41_nano',
+               'gpt4', 'gpt4_turbo', 'gpt4o', 'gpt4o_mini', 'o1', 'o1_pro', 'o3_mini' then true
           when 'chatgpt4o', 'gpt35_turbo', 'o1_mini', 'gpt4o_mini_tts',
                'gpt4o_transcribe', 'gpt4o_search', 'gpt4o_mini_search' then false
           else false # rubocop:disable Lint/DuplicateBranch
@@ -99,8 +103,8 @@ module RubyLLM
 
         def supports_structured_output?(model_id)
           case model_family(model_id)
-          when 'gpt5', 'gpt5_mini', 'gpt5_nano', 'gpt41', 'gpt41_mini', 'gpt41_nano', 'chatgpt4o', 'gpt4o',
-               'gpt4o_mini', 'o1', 'o1_pro', 'o3_mini' then true
+          when 'gpt5', 'gpt51', 'gpt52', 'gpt52_pro', 'gpt5_mini', 'gpt5_nano', 'gpt41', 'gpt41_mini', 'gpt41_nano',
+               'chatgpt4o', 'gpt4o', 'gpt4o_mini', 'o1', 'o1_pro', 'o3_mini' then true
           else false
           end
         end
@@ -111,6 +115,9 @@ module RubyLLM
 
         PRICES = {
           gpt5: { input: 1.25, output: 10.0, cached_input: 0.125 },
+          gpt51: { input: 1.25, output: 10.0, cached_input: 0.12 },
+          gpt52: { input: 1.75, output: 14.0, cached_input: 0.18 },
+          gpt52_pro: { input: 21.0, output: 168.0 },
           gpt5_mini: { input: 0.25, output: 2.0, cached_input: 0.025 },
           gpt5_nano: { input: 0.05, output: 0.4, cached_input: 0.005 },
           gpt41: { input: 2.0, output: 8.0, cached_input: 0.5 },
